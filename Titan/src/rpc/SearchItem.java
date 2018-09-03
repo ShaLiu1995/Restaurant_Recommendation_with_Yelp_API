@@ -1,6 +1,7 @@
 package rpc;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -11,6 +12,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import entity.Item;
+import external.YelpAPI;
 
 /**
  * Servlet implementation class SearchItem
@@ -31,82 +35,18 @@ public class SearchItem extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		// response.getWriter().append("Served at: ").append(request.getContextPath());
-		
-		/*
-		response.setContentType("text/html");
-		
-		PrintWriter out = response.getWriter();
-		out.println("<html><body>");
-		out.println("<h1>Hello World</h1>");
-		out.println("</body></html>");
-		
-		out.close();
-		*/
-		
-		/*
-		response.setContentType("text/html");
-		
-		PrintWriter out = response.getWriter();
-		
-		if (request.getParameter("username") != null) {
-			String username = request.getParameter("username");
-			
-			out.println("<html><body>");
-			out.println("<h1>Hello " + username + "</h1>");
-			out.println("</body></html>");	
-		}
-		
-		out.close();
-		*/	
-		
-		/*
-		response.setContentType("application/json");
-		
-		PrintWriter out = response.getWriter();
-		
-		if (request.getParameter("username") != null) {
-			String username = request.getParameter("username");
-			
-			JSONObject obj = new JSONObject();
-			
-			try {
-				obj.put("username", username);
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-			
-			out.print(obj);
-		}		
-		
-		out.close();
-		*/
-		
-	    /*
-		response.setContentType("application/json");
-		PrintWriter out = response.getWriter();
-		JSONArray array = new JSONArray();
 
-		try {
-			array.put(new JSONObject().put("username", "abcd"));
-			array.put(new JSONObject().put("username", "1234"));
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-
-		out.print(array);
-		out.close();
-        */
+	    double lat = Double.parseDouble(request.getParameter("lat"));
+	    double lon = Double.parseDouble(request.getParameter("lon"));
+	    
+	    YelpAPI yelpAPI = new YelpAPI();
+	    List<Item> items = yelpAPI.search(lat, lon, "");
 	    
 	    JSONArray array = new JSONArray();
-        try {
-            array.put(new JSONObject().put("username", "abcd"));
-            array.put(new JSONObject().put("username", "1234"));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        RpcHelper.writeJsonArray(response, array);
+	    for (Item item : items) {
+	        array.put(item.toJSONObject());
+	    }
+	    RpcHelper.writeJsonArray(response, array);
 	}
 
 	/**

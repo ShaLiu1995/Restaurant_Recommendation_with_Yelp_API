@@ -5,10 +5,17 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import entity.Item;
+import entity.Item.ItemBuilder;
 
 public class YelpAPI {
     private static final String HOST = "https://api.yelp.com";
@@ -19,7 +26,7 @@ public class YelpAPI {
     private static final String TOKEN_TYPE = "Bearer";
     private static final String API_KEY = "vweH4371I58_a_Nvo_6CQippxxHahPHUuqn0AXQh8DYKYbQREvwfsHbvcBK7R5st8TiwQnzEWaZwiugDBMjGpN9ozpIvxaijFlNhl3BFjt4nbFHBM-mrPFfG5o2JW3Yx";
 
-    public JSONArray search(double lat, double lon, String term) {
+    public List<Item> search(double lat, double lon, String term) {
         if (term == null || term.isEmpty()) {
             term = DEFAULT_TERM;
         }
@@ -43,9 +50,11 @@ public class YelpAPI {
             System.out.println("Sending Request to URL: " + url);
             System.out.println("Response Code: " + responseCode);
 
+            
             if (responseCode != 200) {
-                return new JSONArray();
+                // return new JSONArray();
             }
+            
 
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String inputLine = "";
@@ -57,24 +66,109 @@ public class YelpAPI {
             in.close();
 
             JSONObject obj = new JSONObject(response.toString());
+            
             if (!obj.isNull("businesses")) {
-                return obj.getJSONArray("businesses");
+                // return obj.getJSONArray("businesses");
+                JSONArray restaurants = (JSONArray)obj.getJSONArray("businesses");
+                return getItemList(restaurants);
             }
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return new JSONArray();
+        // return new JSONArray();
+        return new ArrayList<>();
     }
     
+    /**
+     * Helper methods
+     */
+    // Convert JSONArray to a list of item objects.
+    private List<Item> getItemList(JSONArray restaurants) throws JSONException {
+        List<Item> list = new ArrayList<>();
+        
+        for (int i = 0; i < restaurants.length(); ++i) {
+            JSONObject restaurant = restaurants.getJSONObject(i);
+            
+            ItemBuilder builder = new ItemBuilder();
+            if(!restaurant.isNull("id")) {
+                builder.setItemId(restaurant.getString("id"));
+            }
+            if(!restaurant.isNull("name")) {
+                builder.setName(restaurant.getString("name"));
+            }
+            if(!restaurant.isNull("url")) {
+                builder.setUrl(restaurant.getString("url"));
+            }
+            if(!restaurant.isNull("image_url")) {
+                builder.setImageUrl(restaurant.getString("image_url"));
+            }
+            if(!restaurant.isNull("rating")) {
+                builder.setRating(restaurant.getDouble("rating"));
+            }
+            if(!restaurant.isNull("distance")) {
+                builder.setDistance(restaurant.getDouble("distance"));
+            }
+            
+            builder.setAddress(getAddress(restaurant));
+            builder.setCategories(getCategories(restaurant));
+            
+            list.add(builder.build());
+        }
+
+        return list;
+    }
+    
+
+    private Set<String> getCategories(JSONObject restaurant) throws JSONException {
+        Set<String> categories = new HashSet<>();
+
+        if (!restaurant.isNull("categories")) {
+            JSONArray array = restaurant.getJSONArray("categories");
+            for (int i = 0; i < array.length(); i++) {
+                JSONObject category = array.getJSONObject(i);
+                if (!category.isNull("alias")) {
+                    categories.add(category.getString("alias"));
+                }
+            }
+        }
+        
+        return categories;
+    }
+
+    
+    private String getAddress(JSONObject restaurant) throws JSONException {
+        String address = "";
+        
+        if (!restaurant.isNull("location")) {
+            JSONObject location = restaurant.getJSONObject("location");
+            if (!location.isNull("display_address")) {
+                JSONArray array = location.getJSONArray("display_address");
+                address = array.join(",");
+            }    
+        }
+
+        return address;
+
+    }
+
+    
     private void queryAPI(double lat, double lon) {
-        JSONArray items = search(lat, lon, null);
+        // JSONArray items = search(lat, lon, null);
+        List<Item> itemList = search(lat, lon, null);
         try {
+            /*
             for (int i = 0; i < items .length(); i++) {
                 JSONObject item = items.getJSONObject(i);
                 System.out.println(item);
             }
-        } catch (JSONException e) {
+            */
+            for (Item item : itemList) {
+                JSONObject jsonObject = item.toJSONObject();
+                System.out.println(jsonObject);
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
