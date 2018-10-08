@@ -4,14 +4,14 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.Statement;
 
-public class MysqlTableCreation {
+public class MySQLTableCreation {
     // Run this as Java application to reset db schema.
     public static void main(String[] args) {
         try {
             // Step 1 Connect to MySQL.
-            System.out.println("Connecting to " + MysqlDBUtil.URL);
+            System.out.println("Connecting to " + MySQLDBUtil.URL);
             Class.forName("com.mysql.cj.jdbc.Driver").getConstructor().newInstance();
-            Connection conn = DriverManager.getConnection(MysqlDBUtil.URL);
+            Connection conn = DriverManager.getConnection(MySQLDBUtil.URL);
             
             if (conn == null) {
                 return;

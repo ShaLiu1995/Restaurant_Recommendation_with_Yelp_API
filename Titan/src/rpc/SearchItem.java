@@ -10,8 +10,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONArray;
+
+import db.MySQLConnection;
 import entity.Item;
-import external.YelpAPI;
 
 /**
  * Servlet implementation class SearchItem
@@ -36,14 +37,23 @@ public class SearchItem extends HttpServlet {
 	    double lat = Double.parseDouble(request.getParameter("lat"));
 	    double lon = Double.parseDouble(request.getParameter("lon"));
 	    
-	    YelpAPI yelpAPI = new YelpAPI();
-	    List<Item> items = yelpAPI.search(lat, lon, "");
-	    
-	    JSONArray array = new JSONArray();
-	    for (Item item : items) {
-	        array.put(item.toJSONObject());
-	    }
-	    RpcHelper.writeJsonArray(response, array);
+	    String term = request.getParameter("term");
+        MySQLConnection connection = new MySQLConnection();
+        try {
+            List<Item> items = connection.searchItems(lat, lon, term);
+
+            JSONArray array = new JSONArray();
+            for (Item item : items) {
+                array.put(item.toJSONObject());
+            }
+            RpcHelper.writeJsonArray(response, array);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            connection.close();
+        }
+
 	}
 
 	/**
