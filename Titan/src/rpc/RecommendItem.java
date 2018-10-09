@@ -1,6 +1,8 @@
 package rpc;
 
 import java.io.IOException;
+import java.util.List;
+
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -8,8 +10,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+
+import algorithm.GeoRecommendation;
+import entity.Item;
 
 /**
  * Servlet implementation class RecommendItem
@@ -30,36 +33,22 @@ public class RecommendItem extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		// response.getWriter().append("Served at: ").append(request.getContextPath());
-		
-	    /*
-		response.setContentType("application/json");
+	    String userId = request.getParameter("user_id");
+	    double lat = Double.parseDouble(request.getParameter("lat"));
+        double lon = Double.parseDouble(request.getParameter("lon"));
+        GeoRecommendation recommendation = new GeoRecommendation();
+        List<Item> items = recommendation.recommendItems(userId, lat, lon);
 
-		PrintWriter out = response.getWriter();
-
-		JSONArray array = new JSONArray();
-
-		try {
-			array.put(new JSONObject().put("username", "abcd").put("address", "San Francisco").put("time", "01/01/2017"));
-			array.put(new JSONObject().put("username", "1234").put("address", "San Jose").put("time", "01/02/2017"));
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-
-		out.print(array);
-
-		out.close();
-		*/
-	    
-        JSONArray array = new JSONArray();
+        JSONArray result = new JSONArray();
         try {
-            array.put(new JSONObject().put("username", "abcd").put("address", "San Francisco").put("time", "01/01/2017"));
-            array.put(new JSONObject().put("username", "1234").put("address", "San Jose").put("time", "01/02/2017"));
-        } catch (JSONException e) {
+            for (Item item : items) {
+                result.put(item.toJSONObject());
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        RpcHelper.writeJsonArray(response, array);
+        RpcHelper.writeJsonArray(response, result);
+
 	}
 
 	/**
