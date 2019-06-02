@@ -191,9 +191,58 @@ public class MySQLConnection {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+    }
+    
+    public String getFullName(String userId) {
+    	if (conn == null) {
+            return null;
+        }
+    	
+    	String sql = "SELECT first_name, last_name FROM users WHERE user_id = ?";
+    	StringBuilder sb = new StringBuilder();
+    	
+    	try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, userId);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+            	sb.append(rs.getString("first_name"));
+            	sb.append(' ');
+            	sb.append(rs.getString("last_name"));
+            }
+           
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    	
+    	return sb.toString();
     }
 
-
-
+    public boolean verifyLogin(String userId, String pwd) {
+    	if (conn == null) {
+    		System.err.println("DB Connection failed");
+            return false;
+        }
+    	
+    	String sql = "SELECT password FROM users WHERE user_id = ?";
+    	boolean isAuthorized = false;
+    	try {
+            PreparedStatement ps = conn.prepareStatement(sql);
+            ps.setString(1, userId);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+            	String saved_pwd = rs.getString("password");    	
+            	if (pwd.equals(saved_pwd)) {
+            		isAuthorized = true;
+            	}
+            }   
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    	
+    	return isAuthorized;
+    }
+    
 }
