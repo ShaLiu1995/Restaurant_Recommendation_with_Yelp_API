@@ -60,7 +60,6 @@ public class Item {
         return result;
     }
 
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
@@ -77,7 +76,6 @@ public class Item {
             return false;
         return true;
     }
-
 
     public String getImageUrl() {
         return imageUrl;
@@ -148,6 +146,5 @@ public class Item {
         public Item build() {
             return new Item(this);
         }
-
     }
 }

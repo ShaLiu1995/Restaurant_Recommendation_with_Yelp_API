@@ -71,8 +71,7 @@ public class YelpAPI {
                 // return obj.getJSONArray("businesses");
                 JSONArray restaurants = (JSONArray)obj.getJSONArray("businesses");
                 return getItemList(restaurants);
-            }
-            
+            }         
         } catch (Exception e) {
             e.printStackTrace();
         }

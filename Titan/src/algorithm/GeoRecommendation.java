@@ -39,14 +39,13 @@ public class GeoRecommendation {
         Set<Item> visitedItems = new HashSet<>();
         for (Entry<String, Integer> category : categoryList) {
             List<Item> items = connection.searchItems(lat, lon, category.getKey());
-            List<Item> filteredItems = new ArrayList<>();
-            
+            List<Item> filteredItems = new ArrayList<>();        
             for (Item item : items) {
                 if (!favoritedItemIds.contains(item.getItemId()) && !visitedItems.contains(item)) {
                     filteredItems.add(item);
                 }
             }
-            
+        
             visitedItems.addAll(filteredItems);
             recommendedItems.addAll(filteredItems);
         }
